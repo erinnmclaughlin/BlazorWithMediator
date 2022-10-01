@@ -1,0 +1,40 @@
+﻿<tr>
+    @if (!IsEditing)
+    {
+        <td>@Forecast.Date.ToShortDateString()</td>
+        <td>@Forecast.TemperatureC</td>
+        <td>@Forecast.TemperatureF</td>
+        <td>@Forecast.Summary</td>
+        <td>
+            <button class="btn btn-primary" type="button" @onclick="Edit">
+                <span class="oi oi-pencil" aria-label="Edit"></span>
+            </button>
+            <button class="btn btn-danger" type="button" @onclick="Delete">
+                <span class="oi oi-trash" aria-label="Delete"></span>
+            </button>
+        </td>
+    }
+    else
+    {
+        <td>
+            <input class="form-control" type="date" @bind="EditModel.Date" disabled="@IsSubmitting" />
+        </td>
+        <td>
+            <input class="form-control" type="number" @bind="EditModel.TemperatureC" disabled="@IsSubmitting" />
+        </td>
+        <td>
+            <input class="form-control" type="number" @bind="EditModel.TemperatureF" disabled="@IsSubmitting" />
+        </td>
+        <td>
+            <input class="form-control" type="text" @bind="EditModel.Summary" disabled="@IsSubmitting" />
+        </td>
+        <td>
+            <button class="btn btn-success" disabled="@IsSubmitting" type="submit" @onclick="SaveChanges">
+                <span class="oi oi-check" aria-label="Save"></span>
+            </button>
+            <button class="btn btn-danger" disabled="@IsSubmitting" type="button" @onclick="DiscardChanges">
+                <span class="oi oi-action-undo" aria-label="Discard Changes"></span>
+            </button>
+        </td>
+    }
+</tr>
