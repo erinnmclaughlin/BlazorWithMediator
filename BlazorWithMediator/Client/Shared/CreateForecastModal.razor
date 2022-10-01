@@ -1,0 +1,38 @@
+﻿<div class="modal fade @(IsOpen ? "show" : "")" tabindex="-1" @onmousedown="Close">
+    <div class="modal-dialog modal-dialog-centered" @onmousedown:stopPropagation="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="Model" OnValidSubmit="Submit">
+                    <div class="mb-3">
+                        <label for="form-date" class="form-label">Date</label>
+                        <InputDate @bind-Value="Model.Date" id="form-date" class="form-control" disabled="@IsSubmitting" />
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="form-tempC" class="form-label">Temp (C)</label>
+                            <InputNumber @bind-Value="Model.TemperatureC" id="form-tempC" class="form-control" disabled="@IsSubmitting" />
+                        </div>
+                        <div class="col">
+                            <label for="form-tempF" class="form-label">Temp (F)</label>
+                            <InputNumber @bind-Value="Model.TemperatureF" id="form-tempF" class="form-control" disabled="@IsSubmitting" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="form-summary" class="form-label">Summary</label>
+                        <InputText @bind-Value="Model.Summary" id="form-summary" class="form-control" disabled="@IsSubmitting" />
+                    </div>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="Close" disabled="@IsSubmitting">Close</button>
+                <button type="button" class="btn btn-primary" @onclick="Submit" disabled="@IsSubmitting">Save changes</button>
+            </div>
+        </div>       
+    </div>
+</div>

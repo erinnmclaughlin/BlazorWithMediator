@@ -31,10 +31,16 @@ else
             }
         </tbody>
     </table>
+
+    <button class="btn btn-success" @onclick="() => CreateModal?.Open()">Add Forecast</button>
 }
+
+<CreateForecastModal @ref="CreateModal" OnSubmit="Create" />
+
 
 @code {
 
+    private CreateForecastModal? CreateModal;
     private List<WeatherForecastDto>? Forecasts { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -42,12 +48,15 @@ else
         Forecasts = await Http.GetFromJsonAsync<List<WeatherForecastDto>>("WeatherForecast");
     }
 
-    private async Task Delete(int id)
+    private async Task Create(CreateForecastRequest request)
     {
-        var response = await Http.DeleteAsync($"WeatherForecast/{id}"); 
+        var response = await Http.PostAsJsonAsync("WeatherForecast", request);
         response.EnsureSuccessStatusCode();
 
-        Forecasts!.RemoveAll(x => x.Id == id);
+        var newForecast = await response.Content.ReadFromJsonAsync<WeatherForecastDto>();
+        Forecasts!.Add(newForecast!);
+
+        CreateModal!.Close();
     }
 
     private async Task Update(UpdateForecastRequest request)
@@ -59,5 +68,13 @@ else
 
         var index = Forecasts!.IndexOf(Forecasts!.First(x => x.Id == request.Id));
         Forecasts[index] = updatedForecast!;
+    }
+
+    private async Task Delete(int id)
+    {
+        var response = await Http.DeleteAsync($"WeatherForecast/{id}"); 
+        response.EnsureSuccessStatusCode();
+
+        Forecasts!.RemoveAll(x => x.Id == id);
     }
 }

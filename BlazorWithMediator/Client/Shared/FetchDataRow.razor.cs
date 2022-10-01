@@ -41,6 +41,9 @@ public partial class FetchDataRow
 
     private async Task SaveChanges()
     {
+        if (IsSubmitting)
+            return;
+
         IsSubmitting = true;
         StateHasChanged();
 
