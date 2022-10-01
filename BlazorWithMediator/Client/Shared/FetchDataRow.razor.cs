@@ -5,8 +5,6 @@ namespace BlazorWithMediator.Client.Shared;
 
 public partial class FetchDataRow
 {
-    [Inject] HttpClient Http { get; set; } = null!;
-
     [Parameter] public WeatherForecastDto Forecast { get; set; } = null!;
     [Parameter] public EventCallback<UpdateForecastRequest> OnRequestUpdate { get; set; }
     [Parameter] public EventCallback<int> OnRequestDelete { get; set; }
