@@ -1,6 +1,7 @@
 ﻿@page "/fetchdata"
 @using BlazorWithMediator.Shared
-@inject HttpClient Http
+@using BlazorWithMediator.Shared.Contracts
+@inject IMediator Mediator
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -41,11 +42,12 @@ else
 @code {
 
     private CreateForecastModal? CreateModal;
-    private List<WeatherForecastDto>? Forecasts { get; set; }
+    private List<IWeatherForecast>? Forecasts { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Forecasts = await Http.GetFromJsonAsync<List<WeatherForecastDto>>("WeatherForecast");
+        var response = await Mediator.Send(new GetAllForecasts.Request());
+        Forecasts = response.Forecasts;
     }
 
     private async Task Create(CreateForecastRequest request)

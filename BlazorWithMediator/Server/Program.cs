@@ -1,4 +1,6 @@
 using BlazorWithMediator.Server;
+using BlazorWithMediator.Server.Services;
+using BlazorWithMediator.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<WeatherDbContext>(options => options.UseSqlite("Data Source=..\\..\\WeatherDb.db;"));
+builder.Services.AddScoped<IWeatherForecastService, DbWeatherForecastService>();
 
 var app = builder.Build();
 
