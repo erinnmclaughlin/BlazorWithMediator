@@ -1,4 +1,5 @@
-using BlazorWithMediator.Shared.Exceptions;
+using BlazorWithMediator.Shared.Common;
+using BlazorWithMediator.Shared.Contracts;
 using BlazorWithMediator.Shared.Features;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -16,33 +17,32 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<GetAllForecasts.Response> GetAll(CancellationToken ct)
+    public async Task<PagedResult<WeatherForecastDto>> GetAll(CancellationToken ct)
     {
         var request = new GetAllForecasts.Request();
         return await Mediator.Send(request, ct);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<GetForecastById.Response> GetById(int id, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> GetById(int id, CancellationToken ct)
     {
         var request = new GetForecastById.Request(id);
         return await Mediator.Send(request, ct);        
     }       
 
     [HttpPost]
-    public async Task<CreateForecast.Response> Create(CreateForecast.Request request, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> Create(CreateForecast.Request request, CancellationToken ct)
     {
         return await Mediator.Send(request, ct);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<UpdateForecast.Response> Update(int id, UpdateForecast.Request request, CancellationToken ct)
+    public async Task Update(int id, UpdateForecast.Request request, CancellationToken ct)
     {
         if (id != request.Id)
-            throw new BadRequestException($"Request id does not match url id.");
+            throw new BadHttpRequestException($"Request id does not match url id.");
 
-        return await Mediator.Send(request, ct);
-
+        await Mediator.Send(request, ct);
     }
 
     [HttpDelete("{id:int}")]

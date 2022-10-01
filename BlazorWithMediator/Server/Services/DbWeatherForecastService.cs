@@ -1,6 +1,6 @@
 ﻿using BlazorWithMediator.Server.Entities;
 using BlazorWithMediator.Shared.Contracts;
-using BlazorWithMediator.Shared.Features;
+using BlazorWithMediator.Shared.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlazorWithMediator.Server.Services;
@@ -14,41 +14,39 @@ public class DbWeatherForecastService : IWeatherForecastService
         Db = db;
     }
 
-    public async Task<CreateForecast.Response> Create(CreateForecast.Request request, CancellationToken ct)
+    public async Task<List<WeatherForecastDto>> GetAll(CancellationToken ct)
     {
-        var forecast = new WeatherForecast
+        return await Db.WeatherForecasts
+            .Select(x => new WeatherForecastDto(x.Id, x.Date, x.TemperatureC, x.Summary))
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    public async Task<WeatherForecastDto> GetById(int id, CancellationToken ct)
+    {
+        return await Db.WeatherForecasts
+            .Where(x => x.Id == id)
+            .Select(x => new WeatherForecastDto(x.Id, x.Date, x.TemperatureC, x.Summary))
+            .AsNoTracking()
+            .FirstAsync(ct);
+    }
+
+    public async Task<int> Create(WeatherForecastDto request, CancellationToken ct)
+    {
+        var entity = new WeatherForecast
         {
             Date = request.Date,
             TemperatureC = request.TemperatureC,
             Summary = request.Summary
         };
 
-        Db.WeatherForecasts.Add(forecast);
+        Db.WeatherForecasts.Add(entity);
         await Db.SaveChangesAsync(ct);
 
-        return new CreateForecast.Response(forecast.Id, forecast.Date, forecast.TemperatureC, forecast.Summary);
+        return entity.Id;
     }
 
-    public async Task<GetAllForecasts.Response> GetAll(CancellationToken ct)
-    {
-        var forecasts = await Db.WeatherForecasts
-            .Select(x => new GetAllForecasts.WeatherForecastDto(x.Id, x.Date, x.TemperatureC, x.Summary))
-            .AsNoTracking()
-            .ToArrayAsync(ct);
-
-        return new GetAllForecasts.Response(forecasts);
-    }
-
-    public async Task<GetForecastById.Response?> GetById(int id, CancellationToken ct)
-    {
-        return await Db.WeatherForecasts
-            .Where(x => x.Id == id)
-            .Select(x => new GetForecastById.Response(x.Id, x.Date, x.TemperatureC, x.Summary))
-            .AsNoTracking()
-            .FirstOrDefaultAsync(ct);
-    }
-
-    public async Task<UpdateForecast.Response> Update(UpdateForecast.Request request, CancellationToken ct)
+    public async Task Update(WeatherForecastDto request, CancellationToken ct)
     {
         var forecast = await Db.WeatherForecasts.FirstAsync(x => x.Id == request.Id, ct);
 
@@ -57,7 +55,12 @@ public class DbWeatherForecastService : IWeatherForecastService
         forecast.Summary = request.Summary;
 
         await Db.SaveChangesAsync(ct);
+    }
 
-        return new UpdateForecast.Response(forecast.Id, forecast.Date, forecast.TemperatureC, forecast.Summary);
+    public async Task Delete(int id, CancellationToken ct)
+    {
+        var forecast = await Db.WeatherForecasts.FirstAsync(x => x.Id == id, ct);
+        Db.Remove(forecast);
+        await Db.SaveChangesAsync(ct);
     }
 }

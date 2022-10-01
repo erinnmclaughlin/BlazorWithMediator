@@ -1,17 +1,18 @@
-﻿using BlazorWithMediator.Shared;
+﻿using BlazorWithMediator.Shared.Contracts;
+using BlazorWithMediator.Shared.Features;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorWithMediator.Client.Shared;
+namespace BlazorWithMediator.Client.Pages.WeatherForecasts;
 
 public partial class FetchDataRow
 {
-    [Parameter] public WeatherForecastDto Forecast { get; set; } = null!;
-    [Parameter] public EventCallback<UpdateForecastRequest> OnRequestUpdate { get; set; }
-    [Parameter] public EventCallback<int> OnRequestDelete { get; set; }
-
     private FetchDataRowEditModel EditModel { get; } = new();
     private bool IsEditing { get; set; }
     private bool IsSubmitting { get; set; }
+
+    [Inject] private IMediator Mediator { get; set; } = null!;
+    [Parameter] public WeatherForecastDto Forecast { get; set; } = null!;
 
     protected override void OnParametersSet()
     {
@@ -28,7 +29,7 @@ public partial class FetchDataRow
         IsSubmitting = true;
         StateHasChanged();
 
-        await OnRequestDelete.InvokeAsync(Forecast.Id);
+        await Mediator.Send(new DeleteForecast.Request(Forecast.Id));
 
         IsSubmitting = false;
     }
@@ -47,14 +48,8 @@ public partial class FetchDataRow
         IsSubmitting = true;
         StateHasChanged();
 
-        await Task.Delay(500);
-        await OnRequestUpdate.InvokeAsync(new UpdateForecastRequest
-        {
-            Id = Forecast.Id,
-            Date = EditModel.Date,
-            Summary = EditModel.Summary,
-            TemperatureC = EditModel.TemperatureC
-        });
+        var request = new UpdateForecast.Request(Forecast.Id, EditModel.Date, EditModel.TemperatureC, EditModel.Summary);
+        await Mediator.Send(request);
 
         IsSubmitting = false;
         IsEditing = false;

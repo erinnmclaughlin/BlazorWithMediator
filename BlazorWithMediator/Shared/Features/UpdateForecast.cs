@@ -1,15 +1,16 @@
-﻿using BlazorWithMediator.Shared.Contracts;
+﻿using BlazorWithMediator.Shared.Common;
+using BlazorWithMediator.Shared.Contracts;
+using BlazorWithMediator.Shared.Services;
 using MediatR;
 
 namespace BlazorWithMediator.Shared.Features;
 
 public static class UpdateForecast
 {
-    public record Request(int Id, DateTime Date, int TemperatureC, string? Summary) : IRequest<Response>;
-    public record Response(int Id, DateTime Date, int TemperatureC, string? Summary) : IWeatherForecast;
-    public record ForecastUpdated(Response Forecast) : INotification;
+    public record Request(int Id, DateTime Date, int TemperatureC, string? Summary) : IRequest<Result<WeatherForecastDto>>;
+    public record ForecastUpdated(WeatherForecastDto Forecast) : INotification;
 
-    public class Handler : IRequestHandler<Request, Response>
+    public class Handler : IRequestHandler<Request, Result<WeatherForecastDto>>
     {
         private IWeatherForecastService ForecastService { get; }
         private IPublisher Publisher { get; }
@@ -20,11 +21,14 @@ public static class UpdateForecast
             Publisher = publisher;
         }
 
-        public async Task<Response> Handle(Request request, CancellationToken ct)
+        public async Task<Result<WeatherForecastDto>> Handle(Request request, CancellationToken ct)
         {
-            var response = await ForecastService.Update(request, ct);
-            await Publisher.Publish(new ForecastUpdated(response), ct);
-            return response;
+            var forecast = new WeatherForecastDto(request.Id, request.Date, request.TemperatureC, request.Summary);
+
+            await ForecastService.Update(forecast, ct);
+            await Publisher.Publish(new ForecastUpdated(forecast), ct);
+
+            return Result.Success(forecast);
         }
     }
 }

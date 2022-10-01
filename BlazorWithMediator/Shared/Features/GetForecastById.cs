@@ -1,15 +1,15 @@
-﻿using BlazorWithMediator.Shared.Contracts;
-using BlazorWithMediator.Shared.Exceptions;
+﻿using BlazorWithMediator.Shared.Common;
+using BlazorWithMediator.Shared.Contracts;
+using BlazorWithMediator.Shared.Services;
 using MediatR;
 
 namespace BlazorWithMediator.Shared.Features;
 
 public static class GetForecastById
 {
-    public record Request(int Id) : IRequest<Response>;
-    public record Response(int Id, DateTime Date, int TemperatureC, string? Summary) : IWeatherForecast;
+    public record Request(int Id) : IRequest<Result<WeatherForecastDto>>;
 
-    public class Handler : IRequestHandler<Request, Response>
+    public class Handler : IRequestHandler<Request, Result<WeatherForecastDto>>
     {
         private IWeatherForecastService ForecastService { get; }
 
@@ -18,14 +18,14 @@ public static class GetForecastById
             ForecastService = forecastService;
         }
 
-        public async Task<Response> Handle(Request request, CancellationToken ct)
+        public async Task<Result<WeatherForecastDto>> Handle(Request request, CancellationToken ct)
         {
             var forecast = await ForecastService.GetById(request.Id, ct);
 
             if (forecast == null)
-                throw new NotFoundException($"Forecast with id {request.Id} was not found.");
+                return Result.Fail(forecast, $"Forecast with id {request.Id} was not found.");
 
-            return forecast;
+            return Result.Success(forecast);
         }
     }
 }

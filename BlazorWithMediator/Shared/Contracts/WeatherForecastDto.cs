@@ -1,10 +1,6 @@
 ﻿namespace BlazorWithMediator.Shared.Contracts;
 
-public interface IWeatherForecast
+public record WeatherForecastDto(int Id, DateTime Date, int TemperatureC, string? Summary)
 {
-    int Id { get; }
-    int TemperatureC { get; }
-    string? Summary { get; }
-
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
