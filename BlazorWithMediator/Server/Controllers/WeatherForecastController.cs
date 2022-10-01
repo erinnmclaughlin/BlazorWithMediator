@@ -1,4 +1,4 @@
-using BlazorWithMediator.Server.Database;
+using BlazorWithMediator.Server.Entities;
 using BlazorWithMediator.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

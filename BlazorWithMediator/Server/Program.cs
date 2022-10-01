@@ -1,4 +1,4 @@
-using BlazorWithMediator.Server.Database;
+using BlazorWithMediator.Server;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-builder.Services.AddDbContext<WeatherDbContext>(options => options.UseSqlite("Data Source=WeatherDb;"));
+builder.Services.AddDbContext<WeatherDbContext>(options => options.UseSqlite("Data Source=Database\\WeatherDb;"));
 
 var app = builder.Build();
 

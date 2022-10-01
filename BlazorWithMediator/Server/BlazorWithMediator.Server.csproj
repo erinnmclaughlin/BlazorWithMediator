@@ -16,5 +16,9 @@
     <ProjectReference Include="..\Shared\BlazorWithMediator.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Database\" />
+  </ItemGroup>
+
 
 </Project>

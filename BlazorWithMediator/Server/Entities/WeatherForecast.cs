@@ -1,6 +1,6 @@
 using BlazorWithMediator.Shared;
 
-namespace BlazorWithMediator.Server.Database;
+namespace BlazorWithMediator.Server.Entities;
 
 public class WeatherForecast
 {
