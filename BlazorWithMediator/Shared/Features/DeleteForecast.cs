@@ -6,24 +6,23 @@ namespace BlazorWithMediator.Shared.Features;
 
 public static class DeleteForecast
 {
+    public static event EventHandler<int>? OnDelete;
+
     public record Request(int Id) : IRequest<Result>;
-    public record ForecastDeleted(int Id) : INotification;
 
     public class Handler : IRequestHandler<Request, Result>
     {
         private IWeatherForecastService ForecastService { get; }
-        private IPublisher Publisher { get; }
 
-        public Handler(IWeatherForecastService forecastService, IPublisher publisher)
+        public Handler(IWeatherForecastService forecastService)
         {
             ForecastService = forecastService;
-            Publisher = publisher;
         }
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
             await ForecastService.Delete(request.Id, cancellationToken);
-            await Publisher.Publish(new ForecastDeleted(request.Id), cancellationToken);
+            OnDelete?.Invoke(this, request.Id);
             return Result.Success();
         }
     }

@@ -15,9 +15,9 @@ public partial class Index : IDisposable
 
     public void Dispose()
     {
-        StateContainer.OnCreate -= HandleCreate;
-        StateContainer.OnUpdate -= HandleUpdate;
-        StateContainer.OnDelete -= HandleDelete;
+        CreateForecast.OnCreate -= HandleCreate;
+        UpdateForecast.OnUpdate -= HandleUpdate;
+        DeleteForecast.OnDelete -= HandleDelete;
     }
 
     protected override async Task OnInitializedAsync()
@@ -25,9 +25,9 @@ public partial class Index : IDisposable
         var response = await Mediator.Send(new GetAllForecasts.Request());
         Forecasts = response.Data?.ToList();
 
-        StateContainer.OnCreate += HandleCreate;
-        StateContainer.OnUpdate += HandleUpdate;
-        StateContainer.OnDelete += HandleDelete;
+        CreateForecast.OnCreate += HandleCreate;
+        UpdateForecast.OnUpdate += HandleUpdate;
+        DeleteForecast.OnDelete += HandleDelete;
     }
 
     private void HandleCreate(object? _, WeatherForecastDto forecast)

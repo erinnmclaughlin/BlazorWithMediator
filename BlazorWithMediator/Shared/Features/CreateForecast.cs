@@ -7,18 +7,17 @@ namespace BlazorWithMediator.Shared.Features;
 
 public static class CreateForecast
 {
+    public static event EventHandler<WeatherForecastDto>? OnCreate;
+
     public record Request(DateTime Date, int TemperatureC, string? Summary) : IRequest<Result<WeatherForecastDto>>;
-    public record ForecastCreated(WeatherForecastDto Forecast) : INotification;
 
     public class Handler : IRequestHandler<Request, Result<WeatherForecastDto>>
     {
         private IWeatherForecastService ForecastService { get; }
-        private IPublisher Publisher { get; }
 
-        public Handler(IWeatherForecastService forecastService, IPublisher publisher)
+        public Handler(IWeatherForecastService forecastService)
         {
             ForecastService = forecastService;
-            Publisher = publisher;
         }
 
         public async Task<Result<WeatherForecastDto>> Handle(Request request, CancellationToken ct)
@@ -28,7 +27,7 @@ public static class CreateForecast
 
             forecast = forecast with { Id = id };
 
-            await Publisher.Publish(new ForecastCreated(forecast), ct);
+            OnCreate?.Invoke(this, forecast);
             return Result.Success(forecast);
         }
     }
