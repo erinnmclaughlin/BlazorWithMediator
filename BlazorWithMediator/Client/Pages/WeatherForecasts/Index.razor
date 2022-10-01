@@ -1,0 +1,36 @@
+﻿@page "/fetchdata"
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (Forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Date</th>
+                <th style="width: 15%;">Temp. (C)</th>
+                <th style="width: 15%;">Temp. (F)</th>
+                <th>Summary</th>
+                <th style="width: 1%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in Forecasts)
+            {
+                <FetchDataRow Forecast="forecast" />
+            }
+        </tbody>
+    </table>
+
+    <button class="btn btn-success" @onclick="() => CreateModal?.Open()">Add Forecast</button>
+}
+
+<CreateForecastModal @ref="CreateModal" />

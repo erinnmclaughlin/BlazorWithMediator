@@ -1,84 +1,54 @@
-using BlazorWithMediator.Server.Entities;
-using BlazorWithMediator.Shared;
+using BlazorWithMediator.Shared.Common;
+using BlazorWithMediator.Shared.Contracts;
+using BlazorWithMediator.Shared.Features;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlazorWithMediator.Server.Controllers;
 
-[ApiController]
-[Route("[controller]")]
+[ApiController, Route("forecasts")]
 public class WeatherForecastController : ControllerBase
 {
-    private readonly WeatherDbContext _context;
+    private IMediator Mediator { get; }
 
-    public WeatherForecastController(WeatherDbContext context)
+    public WeatherForecastController(IMediator mediator)
     {
-        _context = context;
+        Mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<WeatherForecastDto>>> GetAll(CancellationToken ct)
+    public async Task<PagedResult<WeatherForecastDto>> GetAll(CancellationToken ct)
     {
-        var forecasts = await _context.WeatherForecasts.Select(x => x.ToDto()).ToListAsync(ct);
-        return Ok(forecasts);
+        var request = new GetAllForecasts.Request();
+        return await Mediator.Send(request, ct);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> GetById(int id, CancellationToken ct)
     {
-        var forecast = await _context.WeatherForecasts.Where(x => x.Id == id).Select(x => x.ToDto()).FirstOrDefaultAsync(ct);
-        return forecast == null ? NotFound() : Ok(forecast);
+        var request = new GetForecastById.Request(id);
+        return await Mediator.Send(request, ct);        
     }       
 
     [HttpPost]
-    public async Task<ActionResult<WeatherForecastDto>> Create(CreateForecastRequest request, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> Create(CreateForecast.Request request, CancellationToken ct)
     {
-        var forecast = new WeatherForecast
-        {
-            Date = request.Date,
-            TemperatureC = request.TemperatureC,
-            Summary = request.Summary
-        };
-
-        _context.WeatherForecasts.Add(forecast);
-        await _context.SaveChangesAsync(ct);
-
-        return CreatedAtAction(nameof(GetById), new { id = forecast.Id }, forecast.ToDto());
+        return await Mediator.Send(request, ct);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, UpdateForecastRequest request, CancellationToken ct)
+    public async Task Update(int id, UpdateForecast.Request request, CancellationToken ct)
     {
         if (id != request.Id)
-            return BadRequest();
+            throw new BadHttpRequestException($"Request id does not match url id.");
 
-        var forecast = await _context.WeatherForecasts.FirstOrDefaultAsync(x => x.Id == id, ct);
-
-        if (forecast == null)
-            return NotFound();
-
-        forecast.Date = request.Date;
-        forecast.TemperatureC = request.TemperatureC;
-        forecast.Summary = request.Summary;
-
-        _context.WeatherForecasts.Update(forecast);
-        await _context.SaveChangesAsync(ct);
-
-        return Ok(forecast.ToDto());
-
+        await Mediator.Send(request, ct);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    public async Task Delete(int id, CancellationToken ct)
     {
-        var forecast = await _context.WeatherForecasts.FirstOrDefaultAsync(x => x.Id == id, ct);
-
-        if (forecast == null)
-            return NotFound();
-
-        _context.WeatherForecasts.Remove(forecast);
-        await _context.SaveChangesAsync(ct);
-
-        return NoContent();
+        var request = new DeleteForecast.Request(id);
+        await Mediator.Send(request, ct);
     }
 }

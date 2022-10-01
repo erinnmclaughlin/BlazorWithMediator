@@ -1,4 +1,4 @@
-﻿namespace BlazorWithMediator.Shared;
+﻿namespace BlazorWithMediator.Shared.Contracts;
 
 public record WeatherForecastDto(int Id, DateTime Date, int TemperatureC, string? Summary)
 {

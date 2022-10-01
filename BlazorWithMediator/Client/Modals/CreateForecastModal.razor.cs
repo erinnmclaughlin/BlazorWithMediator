@@ -1,11 +1,12 @@
-﻿using BlazorWithMediator.Shared;
+﻿using BlazorWithMediator.Shared.Features;
+using MediatR;
 using Microsoft.AspNetCore.Components;
 
-namespace BlazorWithMediator.Client.Shared;
+namespace BlazorWithMediator.Client.Modals;
 
 public partial class CreateForecastModal
 {
-    [Parameter] public EventCallback<CreateForecastRequest> OnSubmit { get; set; }
+    [Inject] private IMediator Mediator { get; set; } = null!;
 
     private bool IsOpen { get; set; }
     private bool IsSubmitting { get; set; }
@@ -32,12 +33,17 @@ public partial class CreateForecastModal
         IsSubmitting = true;
         StateHasChanged();
 
-        await OnSubmit.InvokeAsync(new CreateForecastRequest
-        {
-            Date = Model.Date,
-            TemperatureC = Model.TemperatureC,
-            Summary = Model.Summary
-        });
+        var request = new CreateForecast.Request
+        (
+            Model.Date,
+            Model.TemperatureC,
+            Model.Summary
+        );
+
+        var response = await Mediator.Send(request);
+
+        if (response.IsSuccess)
+            Close();
 
         IsSubmitting = false;
         StateHasChanged();
