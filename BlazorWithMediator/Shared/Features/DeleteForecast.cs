@@ -1,5 +1,5 @@
 ﻿using BlazorWithMediator.Shared.Common;
-using BlazorWithMediator.Shared.Services;
+using BlazorWithMediator.Shared.Contracts;
 using MediatR;
 
 namespace BlazorWithMediator.Shared.Features;
@@ -12,16 +12,16 @@ public static class DeleteForecast
 
     public class Handler : IRequestHandler<Request, Result>
     {
-        private IWeatherForecastService ForecastService { get; }
+        private readonly IRepository<WeatherForecastDto> _repository;
 
-        public Handler(IWeatherForecastService forecastService)
+        public Handler(IRepository<WeatherForecastDto> repository)
         {
-            ForecastService = forecastService;
+            _repository = repository;
         }
 
         public async Task<Result> Handle(Request request, CancellationToken cancellationToken)
         {
-            await ForecastService.Delete(request.Id, cancellationToken);
+            await _repository.Delete(request.Id, cancellationToken);
             OnDelete?.Invoke(this, request.Id);
             return Result.Success();
         }

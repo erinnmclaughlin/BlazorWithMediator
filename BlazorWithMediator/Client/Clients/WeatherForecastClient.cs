@@ -1,37 +1,37 @@
 ﻿using BlazorWithMediator.Shared.Common;
 using BlazorWithMediator.Shared.Contracts;
 using BlazorWithMediator.Shared.Features;
-using BlazorWithMediator.Shared.Services;
 using System.Net.Http.Json;
 
 namespace BlazorWithMediator.Client.Clients;
 
-public class WeatherForecastClient : IWeatherForecastService
+public class WeatherForecastClient : IRepository<WeatherForecastDto>
 {
     private const string BaseUrl = "forecasts";
-    private HttpClient Http { get; }
 
-    public WeatherForecastClient(HttpClient http)
+    private readonly HttpClient _httpClient;
+
+    public WeatherForecastClient(HttpClient httpClient)
     {
-        Http = http;
+        _httpClient = httpClient;
     }
 
     public async Task<List<WeatherForecastDto>> GetAll(CancellationToken ct)
     {
-        var result = await Http.GetFromJsonAsync<PagedResult<WeatherForecastDto>>(BaseUrl, ct);
+        var result = await _httpClient.GetFromJsonAsync<PagedResult<WeatherForecastDto>>(BaseUrl, ct);
         return result!.Data.ToList();
     }
 
-    public async Task<WeatherForecastDto> GetById(int id, CancellationToken ct)
+    public async Task<WeatherForecastDto?> GetById(int id, CancellationToken ct)
     {
-        var result = await Http.GetFromJsonAsync<Result<WeatherForecastDto>>($"{BaseUrl}/{id}", ct);
-        return result!.Data!;
+        var result = await _httpClient.GetFromJsonAsync<Result<WeatherForecastDto>>($"{BaseUrl}/{id}", ct);
+        return result?.Data;
     }
 
     public async Task<int> Create(WeatherForecastDto forecast, CancellationToken ct)
     {
         var request = new CreateForecast.Request(forecast.Date, forecast.TemperatureC, forecast.Summary);
-        var response = await Http.PostAsJsonAsync(BaseUrl, request, ct);
+        var response = await _httpClient.PostAsJsonAsync(BaseUrl, request, ct);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<Result<WeatherForecastDto>>(cancellationToken: ct);
@@ -41,13 +41,13 @@ public class WeatherForecastClient : IWeatherForecastService
     public async Task Update(WeatherForecastDto forecast, CancellationToken ct)
     {
         var request = new UpdateForecast.Request(forecast.Id, forecast.Date, forecast.TemperatureC, forecast.Summary);
-        var response = await Http.PutAsJsonAsync($"{BaseUrl}/{request.Id}", request, ct);
+        var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/{request.Id}", request, ct);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task Delete(int id, CancellationToken ct)
     {
-        var response = await Http.DeleteAsync($"{BaseUrl}/{id}", ct);
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", ct);
         response.EnsureSuccessStatusCode();
     }
 }

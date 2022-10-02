@@ -1,6 +1,5 @@
 ﻿using BlazorWithMediator.Shared.Common;
 using BlazorWithMediator.Shared.Contracts;
-using BlazorWithMediator.Shared.Services;
 using MediatR;
 
 namespace BlazorWithMediator.Shared.Features;
@@ -11,16 +10,16 @@ public static class GetForecastById
 
     public class Handler : IRequestHandler<Request, Result<WeatherForecastDto>>
     {
-        private IWeatherForecastService ForecastService { get; }
+        private readonly IRepository<WeatherForecastDto> _repository;
 
-        public Handler(IWeatherForecastService forecastService)
+        public Handler(IRepository<WeatherForecastDto> repository)
         {
-            ForecastService = forecastService;
+            _repository = repository;
         }
 
         public async Task<Result<WeatherForecastDto>> Handle(Request request, CancellationToken ct)
         {
-            var forecast = await ForecastService.GetById(request.Id, ct);
+            var forecast = await _repository.GetById(request.Id, ct);
 
             if (forecast == null)
                 return Result.Fail(forecast, $"Forecast with id {request.Id} was not found.");
