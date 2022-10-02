@@ -17,44 +17,38 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<PagedResult<WeatherForecastDto>> GetAll(CancellationToken ct)
     {
         var request = new GetAllForecasts.Request();
-        var response = await _mediator.Send(request, ct);
-        return Ok(response);
+        return await _mediator.Send(request, ct);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> GetById(int id, CancellationToken ct)
     {
         var request = new GetForecastById.Request(id);
-        var response = await _mediator.Send(request, ct);
-
-        return response.Data == null ? NotFound() : Ok(response);
+        return await _mediator.Send(request, ct);
     }       
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateForecast.Request request, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> Create(CreateForecast.Request request, CancellationToken ct)
     {
-        var response = await _mediator.Send(request, ct);
-        return CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response);
+        return await _mediator.Send(request, ct);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, UpdateForecast.Request request, CancellationToken ct)
+    public async Task<Result<WeatherForecastDto>> Update(int id, UpdateForecast.Request request, CancellationToken ct)
     {
         if (id != request.Id)
-            return BadRequest($"Request id does not match url id.");
+            return Result.Fail<WeatherForecastDto>(null, "Request id does not match url id.");
 
-        await _mediator.Send(request, ct);
-        return NoContent();
+        return await _mediator.Send(request, ct);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    public async Task<Result> Delete(int id, CancellationToken ct)
     {
         var request = new DeleteForecast.Request(id);
-        await _mediator.Send(request, ct);
-        return NoContent();
+        return await _mediator.Send(request, ct);
     }
 }
